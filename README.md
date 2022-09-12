@@ -95,7 +95,7 @@ Use the following command to open a secure shell session into the EMR master nod
 
      ssh -i ./alluxio_emr_id_rsa hadoop@<master node public ip>
 
-## Step 7. Create a test Hive table pointing to the S3 bucket
+## Step 7. Create a test Hive table pointing to the Alluxio file system
 
 Alluxio has been configured to use the S3 bucket specified in the EMR `create-cluster` command as the root "under file system" or UFS. Create some test data in that S3 bucket to be used by Alluxio and query engines accessing Alluxio.
 
