@@ -106,13 +106,22 @@ Using the Alluxio CLI, create a new directory in the S3 bucket and import some t
      alluxio fs mkdir /data/tpcds
 
      s3-dist-cp --src s3a://autobots-tpcds-pregenerated-data/spark/unpart_sf100_10k/store_sales/ --dest alluxio:///data/tpcds/store_sales
+
      s3-dist-cp --src s3a://autobots-tpcds-pregenerated-data/spark/unpart_sf100_10k/item/ --dest alluxio:///data/tpcds/item
 
 Confirm that the data files were copied to the Alluxio under file system:
 
      alluxio fs ls -R /data/tpcds/ | more
 
-Create a Hive table that points to the Alluxio (S3) data set:
+Create a Hive table that points to the Alluxio (S3) data set. After downloading the hive SQL script, you will notice that it does not point to HDFS or S3 directly, instead it references the Alluxio file system like this:
+
+     CREATE EXTERNAL TABLE IF NOT EXISTS store_sales (
+      ...
+     STORED AS PARQUET LOCATION 'alluxio:///data/tpcds/store_sales/'
+
+This is possible because Hive has been configured to integrate with Alluxio just like Presto and Spark have been.
+
+Run these commands:
 
      wget https://raw.githubusercontent.com/gregpalmr/alluxio-on-emr/main/hive/create-hive-tables.sql
 
