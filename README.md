@@ -13,12 +13,11 @@ To use the commands outlined in the repo, you will need the following:
 
 - The git CLI installed
 - The AWS CLI installed
-- Your AWS credentials defined, like this:
+- Your AWS credentials defined defined in the `~/.aws/credentials`, like this:
 
-    cat ~/.aws/credentials
-    [default]
-    aws_access_key_id=[AWS ACCESS KEY]
-    aws_secret_access_key=[AWS SECRET KEY]
+     - [default]
+     - aws_access_key_id=[AWS ACCESS KEY]
+     - aws_secret_access_key=[AWS SECRET KEY]
 
 - You also need IAM role membership and permissions to create the following objects:
      - AWS Key Pairs
@@ -61,6 +60,8 @@ Use the following command to launch the Alluxio EMR cluster.  Modify the followi
      --tags  "Name=my-alluxio-emr-cluster-1"
      --instance-type r4.4xlarge
      --instance-count 4
+
+Use the following create-cluster command:
 
      aws --region us-east-1 emr create-cluster \
 	        --name "my-alluxio-emr-cluster-1" \
