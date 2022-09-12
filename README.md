@@ -97,7 +97,19 @@ Use the following command to open a secure shell session into the EMR master nod
 
      ssh -i ./alluxio_emr_id_rsa hadoop@<master node public ip>
 
-## Step 7. Create a test Hive table pointing to the Alluxio file system
+## Step 7. Access Alluxio and Presto Web UIs
+
+Using the public IP address displayed in Step 5 above, access the Alluxio Web UI at:
+
+     http://<public ip address>:19995
+
+This console will show you summary and detailed information about the Alluxio cluster, including master node information, worker node information and performance metrics.
+
+Access the Presto Web UI at:
+
+     http://<public ip address>:8889
+
+## Step 8. Create a test Hive table pointing to the Alluxio file system
 
 Alluxio has been configured to use the S3 bucket specified in the EMR `create-cluster` command as the root "under file system" or UFS. Create some test data in that S3 bucket to be used by Alluxio and query engines accessing Alluxio.
 
@@ -131,9 +143,13 @@ Make sure Hive can access the TPC-DS dataset in Alluxio:
 
      hive --database alluxio_db -e "SELECT * FROM store_sales LIMIT 10;"
 
-## Step 8. Query the TPC-DS data using the Presto query engine and Alluxio
+## Step 9. Query the TPC-DS data using the Presto query engine and Alluxio
 
-First, make a note that the TPC-DS data set in S3 is not yet cached by the Alluxio worker nodes. Run the "alluxio fs admin" command and notice that the "Used Capacity" is shown at 0B:
+First, free any cached TPC-DS data in Alluxio:
+
+     alluxio fs free /data
+
+Then, make a note that the TPC-DS data set in S3 is not yet cached by the Alluxio worker nodes. Run the "alluxio fs admin" command and notice that the "Used Capacity" is shown at 0B:
 
      alluxio fsadmin report
 
@@ -143,9 +159,9 @@ Use the Presto CLI to run the TPC-DS query 44 that gets the top 10 stores with t
 
     time presto-cli --catalog hive --schema alluxio_db -f q44.sql 
 
-Note that it took about 48 seconds to run the TPC-DS 44 query.
+Note that it took about 56 seconds to run the TPC-DS 44 query with 4 Presto and Alluxio worker nodes.
 
-Now run the "alluxio fsadmin report" command again and notice that Alluxio has cached the store_sales data set on the Alluxio worker nodes. The "Used Capacity" is now showing around 38 GB:
+Now run the "alluxio fsadmin report" command again and notice that Alluxio has cached the store_sales data set on the Alluxio worker nodes. The "Used Capacity" is now showing around 43 GB (with 4 Alluxio worker nodes caching data):
 
      alluxio fsadmin report
 
@@ -155,7 +171,7 @@ Now re-run the Presto query and see if the query takes less time:
 
     time presto-cli --catalog hive --schema alluxio_db -f q44.sql 
 
-The query should be about 30% faster after Alluxio cached the S3 data locally. This cached data is not limited to Presto usage, any query against Alluxio can benefit from the cached data, including Spark, Hive, JupyterLab, Impala, Dremio and other users.
+The query should be about 42% faster and taking only 32 seconds to run, after Alluxio cached the S3 data locally. This cached data is not limited to Presto usage, any query against Alluxio can benefit from the cached data, including Spark, Hive, JupyterLab, Impala, Dremio and other users.
 
 Finally, unload the data from the Alluxio cache using the commands:
 
@@ -165,7 +181,7 @@ Finally, unload the data from the Alluxio cache using the commands:
 
 # Destroy EMR Cluster Instructions
 
-## Step 9. Destroy the EMR cluster and supporting AWS objects.
+## Step 10. Destroy the EMR cluster and supporting AWS objects.
 
 Use the following command to get the EMR cluster ID:
 
