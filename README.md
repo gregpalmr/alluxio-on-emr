@@ -74,7 +74,7 @@ Use the following create-cluster command:
 	        --ec2-attributes KeyName=alluxio-emr-keypair \
 	        --ebs-root-volume-size 30 \
 	        --log-uri s3://alluxio-emr-bucket/emr-cluster-logs \
-	        --bootstrap-actions 'Path=s3://greg-palmer-alluxio-public-bucket/alluxio-on-emr/alluxio-emr-6.7.0.sh,Args=[s3://alluxio-emr-bucket,-d,"https://downloads.alluxio.io/downloads/files/2.8.1/alluxio-2.8.1-bin.tar.gz",-p,"alluxio.user.block.size.bytes.default=122M^alluxio.user.file.writetype.default=CACHE_THROUGH^alluxio.master.web.port=19995^alluxio.master.rpc.port=19994",-s,"^"]'
+	        --bootstrap-actions 'Path=s3://greg-palmer-alluxio-public-bucket/alluxio-on-emr/alluxio-emr.sh,Args=[s3://alluxio-emr-bucket,-d,"https://downloads.alluxio.io/downloads/files/2.8.1/alluxio-2.8.1-bin.tar.gz",-p,"alluxio.user.block.size.bytes.default=122M^alluxio.user.file.writetype.default=CACHE_THROUGH^alluxio.master.web.port=19995^alluxio.master.rpc.port=19994",-s,"^"]'
 
 ## Step 5. Get the public IP address of the EMR master node
 
