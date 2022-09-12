@@ -89,25 +89,17 @@ Get the public IP address of the EMR master node by using the AWS EC2 instance c
           
 # Usage Instructions
 
-## Step 6. Open an SSH session into the EMR master node and create a test user
+## Step 6. Open an SSH session into the EMR master node 
 
 Use the following command to open a secure shell session into the EMR master node. Use the public IP address displayed in Step 5 above.
 
      ssh -i ./alluxio_emr_id_rsa hadoop@<master node public ip>
 
-The hadoop user has SUDO privilages on an EMR cluster. Use those privilages to create a test user:
-
-     sudo useradd user1
-
-Become that test user:
-
-     sudo su - user1
-
 ## Step 7. Create a test Hive table pointing to the S3 bucket
 
-Alluxio has been configured to use the S3 bucket specified in the EMR create-cluster command as the root "under file system" or UFS. Create some test data in that S3 bucket to be used by Alluxio and query engines accessing Alluxio.
+Alluxio has been configured to use the S3 bucket specified in the EMR `create-cluster` command as the root "under file system" or UFS. Create some test data in that S3 bucket to be used by Alluxio and query engines accessing Alluxio.
 
-As user1, create a new directory in the S3 bucket and import some test data from the TPC-DS data set.
+Using the Alluxio CLI, create a new directory in the S3 bucket and import some test data from the TPC-DS data set.
 
      alluxio fs mkdir /data/tpcds
 
@@ -116,7 +108,7 @@ As user1, create a new directory in the S3 bucket and import some test data from
 
 Confirm that the data files were copied to the Alluxio under file system:
 
-     alluxio fs ls -R /data/tpcds/
+     alluxio fs ls -R /data/tpcds/ | more
 
 Create a Hive table that points to the Alluxio (S3) data set:
 
@@ -142,7 +134,7 @@ Use the Presto CLI to run the TPC-DS query 44 that gets the top 10 stores with t
 
 Note that it took about 48 seconds to run the TPC-DS 44 query.
 
-Now run the "alluxio fsadmin report" command again and notice that Alluxio has cached the store_sales data set on the Alluxio worker nodes. The "Used Capacity" is showing around 38 GB:
+Now run the "alluxio fsadmin report" command again and notice that Alluxio has cached the store_sales data set on the Alluxio worker nodes. The "Used Capacity" is now showing around 38 GB:
 
      alluxio fsadmin report
 
