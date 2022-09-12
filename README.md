@@ -144,7 +144,7 @@ Confirm that the data files were copied to the Alluxio under file system:
 
 If you are using the Enterprise Edition of Alluxio, then you can take advantage of Alluxio's Transparent URI capability. This will allow you to use the same Hive table definitions that you currently use for direct access to your data (such as hdfs:// or s3://).
 
-To simulate this capability and to invoke the Transparent URI capability, create a Hive table that uses a LOCATION clause that points directly to S3. It will contain a LOCATION clause like this:
+To simulate this capability and to invoke the Transparent URI capability, create a Hive table that uses a LOCATION clause that references an S3 end-point. It will contain a LOCATION clause like this:
 
      LOCATION 's3://alluxio-emr-bucket/data/tpcds/store_sales/'
 
@@ -154,11 +154,47 @@ Run these commands:
 
      hive -f create-hive-tables-s3.sql
 
-Make sure Hive can access the S3 dataset directly:
+Make sure Hive can access the S3 dataset via Alluxio's Transparent URI capability. In this case, Hive will use the Alluxio "shim filesystem" configuration.
 
      hive --database tpcds_s3_db -e "SELECT * FROM store_sales LIMIT 10;"
 
-## Step 10. Create a test Hive table pointing to the Alluxio file system
+## Step 10. Query the TPC-DS data using the Presto query engine and Alluxio Transparent URI (Enterprise only)
+
+First, free any cached TPC-DS data in Alluxio:
+
+     alluxio fs free /data
+
+Then, make a note that the TPC-DS data set in S3 is not yet cached by the Alluxio worker nodes. Run the "alluxio fs admin" command and notice that the "Used Capacity" is shown at 0B:
+
+     alluxio fsadmin report
+
+Use the Presto CLI to run the TPC-DS query 44 that gets the top 10 stores with the highest sales levels. This Presto query will access the Alluxio TPC-DS data stored in the S3 UFS. Use this command:
+
+    wget https://raw.githubusercontent.com/gregpalmr/alluxio-on-emr/main/hive/q44.sql
+
+    time presto-cli --catalog hive --schema tpcds_s3_db -f q44.sql 
+
+Note that it took about 56 seconds to run the TPC-DS 44 query with 4 Presto and Alluxio worker nodes.
+
+Now run the "alluxio fsadmin report" command again and notice that Alluxio has cached the store_sales data set on the Alluxio worker nodes. The "Used Capacity" is now showing around 43 GB (with 4 Alluxio worker nodes caching data):
+
+     alluxio fsadmin report
+
+The "Used Capacity" value has increased because Alluxio automatically cached the store_sales data in S3 when the Presto query first requested the data. Users can also pre-load data into the Alluxio cache using the "alluxio fs load" command.
+
+Now re-run the Presto query and see if the query takes less time:
+
+    time presto-cli --catalog hive --schema tpcds_s3_db -f q44.sql 
+
+The query should be about 42% faster and taking only 32 seconds to run, after Alluxio cached the S3 data locally. This cached data is not limited to Presto usage, any query against Alluxio can benefit from the cached data, including Spark, Hive, JupyterLab, Impala, Dremio and other users.
+
+Finally, unload the data from the Alluxio cache using the commands:
+
+     alluxio fs free /data
+
+     alluxio fsadmin report
+
+## Step 11. Create a test Hive table pointing to the Alluxio file system (Community and Enterprise Editions)
 
 If you are using the Community Edition of Alluxio, then you will have to modify your Hive table definitions to switch to a location URI that references the Alluxio end-point. For tables that are already defined, alter the location with a command like this:
 
@@ -180,9 +216,9 @@ Run these commands:
 
 Make sure Hive can access the TPC-DS dataset in Alluxio:
 
-     hive --database alluxio_db -e "SELECT * FROM store_sales LIMIT 10;"
+     hive --database tpcds_alluxio_db -e "SELECT * FROM store_sales LIMIT 10;"
 
-## Step 9. Query the TPC-DS data using the Presto query engine and Alluxio
+## Step 9. Query the TPC-DS data using the Presto query engine and Alluxio (Community and Enterprise Editions)
 
 First, free any cached TPC-DS data in Alluxio:
 
@@ -196,7 +232,7 @@ Use the Presto CLI to run the TPC-DS query 44 that gets the top 10 stores with t
 
     wget https://raw.githubusercontent.com/gregpalmr/alluxio-on-emr/main/hive/q44.sql
 
-    time presto-cli --catalog hive --schema alluxio_db -f q44.sql 
+    time presto-cli --catalog hive --schema tpcds_alluxio_db -f q44.sql 
 
 Note that it took about 56 seconds to run the TPC-DS 44 query with 4 Presto and Alluxio worker nodes.
 
@@ -208,7 +244,7 @@ The "Used Capacity" value has increased because Alluxio automatically cached the
 
 Now re-run the Presto query and see if the query takes less time:
 
-    time presto-cli --catalog hive --schema alluxio_db -f q44.sql 
+    time presto-cli --catalog hive --schema tpcds_alluxio_db -f q44.sql 
 
 The query should be about 42% faster and taking only 32 seconds to run, after Alluxio cached the S3 data locally. This cached data is not limited to Presto usage, any query against Alluxio can benefit from the cached data, including Spark, Hive, JupyterLab, Impala, Dremio and other users.
 

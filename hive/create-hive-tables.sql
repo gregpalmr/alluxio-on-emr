@@ -1,6 +1,6 @@
 -- Create a new Hive schema and use it
-CREATE SCHEMA alluxio_db;
-USE alluxio_db;
+CREATE SCHEMA tpcds_alluxio_db;
+USE tpcds_alluxio_db;
 
 -- Create the store_sales Hive table
 CREATE EXTERNAL TABLE IF NOT EXISTS store_sales (
