@@ -1,8 +1,8 @@
-# Create a new Hive schema and use it
+-- Create a new Hive schema and use it
 CREATE SCHEMA alluxio_db;
 USE alluxio_db;
 
-# Create the store_sales Hive table
+-- Create the store_sales Hive table
 CREATE EXTERNAL TABLE IF NOT EXISTS store_sales (
       ss_sold_date_sk int
       , ss_sold_time_sk int
@@ -31,7 +31,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS store_sales (
       STORED AS PARQUET LOCATION 'alluxio:///data/tpcds/store_sales/'
       TBLPROPERTIES ('parquet.compression'='SNAPPY');
 
-# Create the item Hive table
+-- Create the item Hive table
 CREATE EXTERNAL TABLE IF NOT EXISTS item (
       i_item_sk int
       , i_item_id string
