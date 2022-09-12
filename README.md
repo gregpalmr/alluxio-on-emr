@@ -3,7 +3,7 @@ Launch Alluxio Data Orchestration on EMR with Presto, Spark, Hive and JupyterLab
 
 ## Background
 
-Alluxio Data Orchestration allows data engineers to allow data consumers to access data anyware in the enterprise. Weather it be an on-prem Hadoop cluster or S3 compatible storage, or a cloud based datalake, Alluxio's unified-namespace feature allows Presto, Impala, Drill, Dremio, Spark and Hive users to access remote data without knowing that the data is remote. And Alluxio's memory and NVMe based caching allows those users to access the data a "local data" query speeds.
+Alluxio Data Orchestration enables data engineers to allow data consumers to access data anyware in the enterprise. Whether the data is in an on-prem storage environment like Hadoop or S3 compatible storage, or in a cloud- based datalake, Alluxio's unified-namespace feature allows Presto, Impala, Drill, Dremio, Spark and Hive users to access remote data without knowing that the data is remote. And Alluxio's memory caching allows those users to access the data at "local data" query speeds.
 
 This git repo contains instructions and artifacts for launching Alluxio data orchestration on an EMR cluster.
 
@@ -14,10 +14,12 @@ To use the commands outlined in the repo, you will need the following:
 - The git CLI installed
 - The AWS CLI installed
 - Your AWS credentials defined, like this:
+
      cat ~/.aws/credentials
           [default]
           aws_access_key_id=[AWS ACCESS KEY]
           aws_secret_access_key=[AWS SECRET KEY]
+
 - You also need IAM role membership and permissions to create the following objects:
      - AWS Key Pairs
      - AWS S3 Buckets (or already have one available)
@@ -38,7 +40,7 @@ Generate a private and public ssh key using a command like this:
 
 Import the newly generated ssh key and create a keypair in your AWS environment. Use this command:
 
-   aws --region us-east-1 ec2 \
+     aws --region us-east-1 ec2 \
         import-key-pair \
         --key-name "alluxio-emr-keypair" \
         --public-key-material fileb://alluxio_emr_id_rsa.pub
@@ -47,7 +49,7 @@ Import the newly generated ssh key and create a keypair in your AWS environment.
 
 Use the following commands to create the S3 bucket:
 
-   aws --region us-east-1 s3api create-bucket --bucket alluxio-emr-bucket \
+     aws --region us-east-1 s3api create-bucket --bucket alluxio-emr-bucket \
           --region us-east-1 \
           --acl private 
 
