@@ -59,7 +59,9 @@ Use the following command to launch the Alluxio EMR cluster.  Modify the followi
      --name "my-alluxio-emr-cluster-1"
      --tags  "Name=my-alluxio-emr-cluster-1"
      --instance-type r4.4xlarge
-     --instance-count 4
+     --instance-count 5
+
+Note that the alluxio-emr.sh script does NOT configure the Alluxio Catalog Service with the Presto plugin. Running the Alluxio Catalog Service is not supported in the newer releases of Presto on EMR.
 
 Use the following create-cluster command:
 
@@ -67,7 +69,7 @@ Use the following create-cluster command:
 	        --name "my-alluxio-emr-cluster-1" \
 	        --tags "Name=my-alluxio-emr-cluster-1" \
 	        --release-label emr-6.7.0 \
-	        --instance-count 4 \
+	        --instance-count 5 \
 	        --instance-type r4.4xlarge \
 	        --applications Name=Presto Name=Hive Name=Spark Name=JupyterHub \
 	        --configurations '[{"Classification":"hive-site","Properties":{"hive.metastore.client.factory.class":"com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory"}},{"Classification":"presto-connector-hive","Properties":{"hive.metastore":"glue","hive.s3-file-system-type":"PRESTO"}},{"Classification":"hadoop-env","Configurations":[{"Classification":"export","Properties":{"HADOOP_CLASSPATH":"/opt/alluxio/client/alluxio-client.jar:${HADOOP_CLASSPATH}"}}],"Properties":{}}]' \
