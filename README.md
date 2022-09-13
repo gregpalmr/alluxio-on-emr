@@ -3,7 +3,7 @@ Launch Alluxio Data Orchestration on EMR with Presto, Spark, Hive and JupyterLab
 
 ## Background
 
-Alluxio Data Orchestration enables data engineers to allow data consumers to access data anyware in the enterprise. Whether the data is in an on-prem storage environment like Hadoop or S3 compatible storage, or in a cloud- based datalake, Alluxio's unified-namespace feature allows Presto, Impala, Drill, Dremio, Spark and Hive users to access remote data without knowing that the data is remote. And Alluxio's memory caching allows those users to access the data at "local data" query speeds.
+Alluxio Data Orchestration enables data engineers to allow data consumers to access data anyware in the enterprise. Whether the data is in an on-prem storage environment like Hadoop or S3 compatible storage, or in a cloud-based datalake, Alluxio's unified-namespace feature allows Presto, Impala, Drill, Dremio, Spark and Hive users to access remote data without knowing that the data is remote. And Alluxio's memory caching allows those users to access the data at "local data" query speeds.
 
 This git repo contains instructions and artifacts for launching Alluxio data orchestration on an EMR cluster.
 
@@ -124,7 +124,7 @@ Access the Presto Web UI at:
 
      http://<public ip address>:8889
 
-## Step 8. Load some TPC-DS data info Alluxio and the S3 under file system (UFS)
+## Step 8. Load TPC-DS data into Alluxio and the S3 under file system (UFS)
 
 Alluxio has been configured to use the S3 bucket specified in the EMR `create-cluster` command as the root "under file system" or UFS. Create some test data in that S3 bucket to be used by Alluxio and query engines accessing Alluxio.
 
@@ -140,7 +140,7 @@ Confirm that the data files were copied to the Alluxio under file system:
 
      alluxio fs ls -R /data/tpcds/ | more
 
-## Step 9. Use Alluxio Transparent URI to access existing Hive tables (Enterprise Edition only)
+## Step 9. Use Alluxio Transparent URI with existing Hive tables (Enterprise Edition only)
 
 If you are using the Enterprise Edition of Alluxio, then you can take advantage of Alluxio's Transparent URI capability. This will allow you to use the same Hive table definitions that you currently use for direct access to your data (such as hdfs:// or s3://).
 
@@ -200,7 +200,7 @@ If you are using the Community Edition of Alluxio, then you will have to modify 
 
      hive> ALTER TABLE <my table> SET LOCATION "alluxio://<emr master node ip address>:19994/user/hive/warehouse/<my table dir>";
 
-Create a Hive table that points to the Alluxio (S3) data set. After downloading the hive SQL script, you will notice that it does not point to HDFS or S3 directly, instead it references the Alluxio file system like this:
+To simulate this, create a Hive table that points to the Alluxio (S3) data set. After downloading the hive SQL script, you will notice that it does not point to HDFS or S3 directly, instead it references the Alluxio file system like this:
 
      CREATE EXTERNAL TABLE IF NOT EXISTS store_sales (
       ...
@@ -218,7 +218,7 @@ Make sure Hive can access the TPC-DS dataset in Alluxio:
 
      hive --database tpcds_alluxio_db -e "SELECT * FROM store_sales LIMIT 10;"
 
-## Step 9. Query the TPC-DS data using the Presto query engine and Alluxio (Community and Enterprise Editions)
+## Step 12. Query the TPC-DS data using the Presto query engine and Alluxio (Community and Enterprise Editions)
 
 First, free any cached TPC-DS data in Alluxio:
 
@@ -256,7 +256,7 @@ Finally, unload the data from the Alluxio cache using the commands:
 
 # Destroy EMR Cluster Instructions
 
-## Step 10. Destroy the EMR cluster and supporting AWS objects.
+## Step 13. Destroy the EMR cluster and supporting AWS objects.
 
 Use the following command to get the EMR cluster ID:
 
