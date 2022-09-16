@@ -88,7 +88,7 @@ Use the following create-cluster command:
 Get the public IP address of the EMR master node by using the AWS EC2 instance console, or run the following CLI command:
 
      aws ec2 describe-instances \
-          --filters Name=tag:"Name",Values="my-alluxio-emr-cluster-1"  \
+          --filters Name=tag:"Name",Values="my-alluxio-enterprise-emr-cluster-1"  \
                     Name=tag:"aws:elasticmapreduce:instance-group-role",Values="MASTER" \
                     Name=instance-state-name,Values="running" \
           --query  'Reservations[*].Instances[*].[PublicIpAddress]' \
