@@ -268,6 +268,8 @@ Use the following command to remove the AWS key pair used with the EMR cluster:
 
 Use the following command to remove the S3 bucket used with the EMR cluster:
 
+     aws --region us-east-1 s3 rm s3://alluxio-emr-bucket/ --recursive
+
      aws --region us-east-1 s3api delete-bucket  --bucket alluxio-emr-bucket
 
 
