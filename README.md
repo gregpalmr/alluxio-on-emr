@@ -78,7 +78,7 @@ Use the following create-cluster command:
 	        --instance-type r4.4xlarge \
 	        --release-label emr-6.7.0 \
 	        --applications Name=Presto Name=Hive Name=Spark Name=JupyterHub \
-	        --configurations '[ { "Classification": "hive-site", "Properties": { "hive.metastore.client.factory.class": "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory", "fs.s3.impl": "alluxio.hadoop.ShimFileSystem", "fs.AbstractFileSystem.s3.impl": "alluxio.hadoop.AlluxioShimFileSystem" } }, { "Classification": "core-site", "Properties": { "fs.s3.impl": "alluxio.hadoop.ShimFileSystem", "fs.AbstractFileSystem.s3.impl": "alluxio.hadoop.AlluxioShimFileSystem" } }, { "Classification": "presto-connector-hive", "Properties": { "hive.metastore": "glue", "hive.s3-file-system-type": "PRESTO" } }, { "Classification": "hadoop-env", "Configurations": [ { "Classification": "export", "Properties": { "HADOOP_CLASSPATH": "/opt/alluxio/client/alluxio-client.jar:${HADOOP_CLASSPATH}" } } ], "Properties": {} } ]' \
+             --configurations '[ { "Classification": "hive-site", "Properties": { "hive.metastore.client.factory.class": "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory", "fs.s3.impl": "alluxio.hadoop.ShimFileSystem", "fs.AbstractFileSystem.s3.impl": "alluxio.hadoop.AlluxioShimFileSystem", "fs.hdfs.impl": "alluxio.hadoop.ShimFileSystem", "fs.AbstractFileSystem.hdfs.impl": "alluxio.hadoop.AlluxioShimFileSystem" } }, { "Classification": "core-site", "Properties": { "fs.s3.impl": "alluxio.hadoop.ShimFileSystem", "fs.AbstractFileSystem.s3.impl": "alluxio.hadoop.AlluxioShimFileSystem" } }, { "Classification": "presto-connector-hive", "Properties": { "hive.metastore": "glue", "hive.s3-file-system-type": "PRESTO" } }, { "Classification": "hadoop-env", "Configurations": [ { "Classification": "export", "Properties": { "HADOOP_CLASSPATH": "/opt/alluxio/client/alluxio-client.jar:${HADOOP_CLASSPATH}" } } ], "Properties": {} } ]' \
 	        --ebs-root-volume-size 30 \
 	        --log-uri s3://alluxio-emr-bucket/emr-cluster-logs \
 	        --bootstrap-actions 'Path=s3://greg-palmer-alluxio-public-bucket/alluxio-on-emr/alluxio-enterprise-emr-bootstrap.sh,Args=[s3://alluxio-emr-bucket,-d,"https://downloads.alluxio.io/protected/files/alluxio-enterprise-trial.tar.gz",-p,"alluxio.user.block.size.bytes.default=122M^alluxio.user.file.writetype.default=CACHE_THROUGH^alluxio.master.shimfs.auto.mount.enabled=true^alluxio.master.shimfs.auto.mount.readonly=false^alluxio.user.shimfs.bypass.prefix.list=",-s,"^"]'
@@ -144,9 +144,9 @@ Run these commands:
 
      wget https://raw.githubusercontent.com/gregpalmr/alluxio-on-emr/main/hive/create-hive-tables-s3.sql
 
-NOTE: If you changed the name of the S3 bucket specified in the first argument of the alluxio-enteprise-emr-bootstrap.sh script, then modify the create-hive-tables-s3.sql to use that bucket name. See "Args=[s3://alluxio-emr-bucket" in the create-cluster command in Step 4.
-
      hive -f create-hive-tables-s3.sql
+
+NOTE: If you changed the name of the S3 bucket specified in the first argument of the alluxio-enteprise-emr-bootstrap.sh script, then modify the create-hive-tables-s3.sql to use that bucket name. See "Args=[s3://alluxio-emr-bucket" in the create-cluster command in Step 4.
 
 Make sure Hive can access the S3 dataset via Alluxio's Transparent URI capability. In this case, Hive will use the Alluxio "shim filesystem" configuration.
 
@@ -188,13 +188,13 @@ Finally, unload the data from the Alluxio cache using the commands:
 
      alluxio fsadmin report
 
-## Step 11. Create a test Hive table pointing to the Alluxio virtual file system 
+## Step 11. Create a test Hive table pointing to the Alluxio virtual file system end-point
 
 If you have existing Hive table definitions in your Hive or Glue metastore, then you will have to modify your Hive table definitions to switch to a location URI that references the Alluxio end-point. For tables that are already defined, alter the location with a command like this:
 
      hive> ALTER TABLE <my table> SET LOCATION "alluxio://<emr master node ip address>:19994/user/hive/warehouse/<my table dir>";
 
-To simulate this, create a Hive table that points to the Alluxio (S3) data set. After downloading the hive SQL script, you will notice that it does not point to HDFS or S3 directly, instead it references the Alluxio virtual file system like this:
+To simulate this, create a Hive table that points to the Alluxio virtual file system. After downloading the hive SQL script, you will notice that it does not point to HDFS or S3 directly, instead it references the Alluxio virtual file system like this:
 
      CREATE EXTERNAL TABLE IF NOT EXISTS store_sales (
       ...
@@ -214,7 +214,7 @@ Make sure Hive can access the TPC-DS dataset in Alluxio:
 
      hive --database tpcds_alluxio_db -e "SELECT * FROM store_sales LIMIT 10;"
 
-## Step 12. Query the TPC-DS data using the Presto query engine and Alluxio (Community and Enterprise Editions)
+## Step 12. Query the TPC-DS data using the Presto query engine and the Alluxio virtual file system end-point
 
 First, free any cached TPC-DS data in Alluxio:
 
