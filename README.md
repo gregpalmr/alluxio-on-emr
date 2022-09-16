@@ -41,7 +41,7 @@ Import the newly generated ssh key and create a keypair in your AWS environment.
 
      aws --region us-east-1 ec2 \
         import-key-pair \
-        --key-name "alluxio-emr-keypair" \
+        --key-name "my-alluxio-emr-keypair" \
         --public-key-material fileb://alluxio_emr_id_rsa.pub
 
 ## Step 3. Create the S3 bucket for this EMR
@@ -58,40 +58,30 @@ Use the following command to launch the Alluxio EMR cluster.  Modify the followi
 
      --name "my-alluxio-emr-cluster-1"
      --tags  "Name=my-alluxio-emr-cluster-1"
+     --ec2-attributes KeyName=my-alluxio-emr-keypair
      --instance-type r4.4xlarge
-     --instance-count 5
+     --instance-count 5                        (must be at least 2)
 
-Note that the alluxio-emr.sh script does NOT configure the Alluxio Catalog Service with the Presto plugin. Running the Alluxio Catalog Service is not supported in the newer releases of Presto on EMR.
+And modify the S3 bucket name as the first argument to the alluxio-enterprise-emr-bootstrap.sh script. Like this:
+
+     ... alluxio-enterprise-emr-bootstrap.sh,Args=[s3://alluxio-emr-bucket ...
+
+NOTE: The alluxio-enterprise-emr-bootstrap.sh script does NOT configure the Alluxio Catalog Service with the Presto plugin. Running the Alluxio Catalog Service is not supported in the newer releases of Presto on EMR. The Enterprise Edition of Alluxio provides the Transparent URI feature which allows the use of unmodified Hive table definitions to be redirected to Alluxio. See below.
 
 Use the following create-cluster command:
 
      aws --region us-east-1 emr create-cluster \
-	        --name "my-alluxio-emr-cluster-1" \
-	        --tags "Name=my-alluxio-emr-cluster-1" \
-	        --release-label emr-6.7.0 \
-	        --instance-count 5 \
-	        --instance-type r4.4xlarge \
-	        --applications Name=Presto Name=Hive Name=Spark Name=JupyterHub \
-	        --configurations '[{"Classification":"hive-site","Properties":{"hive.metastore.client.factory.class":"com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory"}},{"Classification":"presto-connector-hive","Properties":{"hive.metastore":"glue","hive.s3-file-system-type":"PRESTO"}},{"Classification":"hadoop-env","Configurations":[{"Classification":"export","Properties":{"HADOOP_CLASSPATH":"/opt/alluxio/client/alluxio-client.jar:${HADOOP_CLASSPATH}"}}],"Properties":{}}]' \
-	        --ec2-attributes KeyName=alluxio-emr-keypair \
-	        --ebs-root-volume-size 30 \
-	        --log-uri s3://alluxio-emr-bucket/emr-cluster-logs \
-	        --bootstrap-actions 'Path=s3://greg-palmer-alluxio-public-bucket/alluxio-on-emr/alluxio-emr.sh,Args=[s3://alluxio-emr-bucket,-d,"https://downloads.alluxio.io/downloads/files/2.8.1/alluxio-2.8.1-bin.tar.gz",-p,"alluxio.user.block.size.bytes.default=122M^alluxio.user.file.writetype.default=CACHE_THROUGH^alluxio.master.web.port=19995^alluxio.master.rpc.port=19994",-s,"^"]'
-
-If you want to test the Enterprise features of Alluxio, then contact your Alluxio sales representative (sales@alluxio.com) and request a trial license key. Once you receive that license key, you can launch the EMR cluster using the following command. Modify the xxx argument to point to the license key file that you uploaded to a private S3 bucket.
-
-     aws --region us-east-1 emr create-cluster \
 	        --name "my-alluxio-enterprise-emr-cluster-1" \
 	        --tags "Name=my-alluxio-enterprise-emr-cluster-1" \
-	        --release-label emr-6.7.0 \
+	        --ec2-attributes KeyName=my-alluxio-emr-keypair \
 	        --instance-count 5 \
 	        --instance-type r4.4xlarge \
+	        --release-label emr-6.7.0 \
 	        --applications Name=Presto Name=Hive Name=Spark Name=JupyterHub \
-	        --configurations '[{"Classification":"hive-site","Properties":{"hive.metastore.client.factory.class":"com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory"}},{"Classification":"presto-connector-hive","Properties":{"hive.metastore":"glue","hive.s3-file-system-type":"PRESTO"}},{"Classification":"hadoop-env","Configurations":[{"Classification":"export","Properties":{"HADOOP_CLASSPATH":"/opt/alluxio/client/alluxio-client.jar:${HADOOP_CLASSPATH}"}}],"Properties":{}}]' \
-	        --ec2-attributes KeyName=alluxio-emr-keypair \
+	        --configurations '[ { "Classification": "hive-site", "Properties": { "hive.metastore.client.factory.class": "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory", "fs.s3.impl": "alluxio.hadoop.ShimFileSystem", "fs.AbstractFileSystem.s3.impl": "alluxio.hadoop.AlluxioShimFileSystem" } }, { "Classification": "core-site", "Properties": { "fs.s3.impl": "alluxio.hadoop.ShimFileSystem", "fs.AbstractFileSystem.s3.impl": "alluxio.hadoop.AlluxioShimFileSystem" } }, { "Classification": "presto-connector-hive", "Properties": { "hive.metastore": "glue", "hive.s3-file-system-type": "PRESTO" } }, { "Classification": "hadoop-env", "Configurations": [ { "Classification": "export", "Properties": { "HADOOP_CLASSPATH": "/opt/alluxio/client/alluxio-client.jar:${HADOOP_CLASSPATH}" } } ], "Properties": {} } ]' \
 	        --ebs-root-volume-size 30 \
 	        --log-uri s3://alluxio-emr-bucket/emr-cluster-logs \
-	        --bootstrap-actions 'Path=s3://greg-palmer-alluxio-public-bucket/alluxio-on-emr/alluxio-emr.sh,Args=[s3://alluxio-emr-bucket,-d,"https://downloads.alluxio.io/protected/files/alluxio-enterprise-trial.tar.gz",-p,"alluxio.user.block.size.bytes.default=122M^alluxio.user.file.writetype.default=CACHE_THROUGH^alluxio.master.web.port=19995^alluxio.master.rpc.port=19994",-s,"^"]'
+	        --bootstrap-actions 'Path=s3://greg-palmer-alluxio-public-bucket/alluxio-on-emr/alluxio-enterprise-emr-bootstrap.sh,Args=[s3://alluxio-emr-bucket,-d,"https://downloads.alluxio.io/protected/files/alluxio-enterprise-trial.tar.gz",-p,"alluxio.user.block.size.bytes.default=122M^alluxio.user.file.writetype.default=CACHE_THROUGH^alluxio.master.shimfs.auto.mount.enabled=true^alluxio.master.shimfs.auto.mount.readonly=false^alluxio.user.shimfs.bypass.prefix.list=",-s,"^"]'
 
 ## Step 5. Get the public IP address of the EMR master node
 
@@ -113,6 +103,8 @@ Use the following command to open a secure shell session into the EMR master nod
      ssh -i ./alluxio_emr_id_rsa hadoop@<master node public ip>
 
 ## Step 7. Access Alluxio and Presto Web UIs
+
+Note: You may have to modify the AWS Security Group that is associated with your EMR master node to allow access to the Alluxio and Presto Web UIs. Add ingress rules that allow access to ports 19995 and 8889 to your workstation or laptop computer.
 
 Using the public IP address displayed in Step 5 above, access the Alluxio Web UI at:
 
@@ -140,11 +132,11 @@ Confirm that the data files were copied to the Alluxio under file system:
 
      alluxio fs ls -R /data/tpcds/ | more
 
-## Step 9. Use Alluxio Transparent URI with existing Hive tables (Enterprise Edition only)
+## Step 9. Use Alluxio Transparent URI with existing Hive tables 
 
-If you are using the Enterprise Edition of Alluxio, then you can take advantage of Alluxio's Transparent URI capability. This will allow you to use the same Hive table definitions that you currently use for direct access to your data (such as hdfs:// or s3://).
+If you are using the Enterprise Edition of Alluxio, then you can take advantage of Alluxio's Transparent URI capability. This will allow you to use the same Hive table definitions that you currently use for direct access to your data (such as hdfs:// or s3://), but redirect the read/write requests to the Alluxio virtual file system.
 
-To simulate this capability and to invoke the Transparent URI capability, create a Hive table that uses a LOCATION clause that references an S3 end-point. It will contain a LOCATION clause like this:
+To demonstrate the Transparent URI capability, create a Hive table that uses a LOCATION clause that references an S3 end-point or a hdfs end-point. It will contain a LOCATION clause like this:
 
      LOCATION 's3://alluxio-emr-bucket/data/tpcds/store_sales/'
 
@@ -152,13 +144,15 @@ Run these commands:
 
      wget https://raw.githubusercontent.com/gregpalmr/alluxio-on-emr/main/hive/create-hive-tables-s3.sql
 
+NOTE: If you changed the name of the S3 bucket specified in the first argument of the alluxio-enteprise-emr-bootstrap.sh script, then modify the create-hive-tables-s3.sql to use that bucket name. See "Args=[s3://alluxio-emr-bucket" in the create-cluster command in Step 4.
+
      hive -f create-hive-tables-s3.sql
 
 Make sure Hive can access the S3 dataset via Alluxio's Transparent URI capability. In this case, Hive will use the Alluxio "shim filesystem" configuration.
 
      hive --database tpcds_s3_db -e "SELECT * FROM store_sales LIMIT 10;"
 
-## Step 10. Query the TPC-DS data using the Presto query engine and Alluxio Transparent URI (Enterprise only)
+## Step 10. Query the TPC-DS data using the Presto query engine and Alluxio Transparent URI 
 
 First, free any cached TPC-DS data in Alluxio:
 
@@ -194,25 +188,27 @@ Finally, unload the data from the Alluxio cache using the commands:
 
      alluxio fsadmin report
 
-## Step 11. Create a test Hive table pointing to the Alluxio file system (Community and Enterprise Editions)
+## Step 11. Create a test Hive table pointing to the Alluxio virtual file system 
 
-If you are using the Community Edition of Alluxio, then you will have to modify your Hive table definitions to switch to a location URI that references the Alluxio end-point. For tables that are already defined, alter the location with a command like this:
+If you have existing Hive table definitions in your Hive or Glue metastore, then you will have to modify your Hive table definitions to switch to a location URI that references the Alluxio end-point. For tables that are already defined, alter the location with a command like this:
 
      hive> ALTER TABLE <my table> SET LOCATION "alluxio://<emr master node ip address>:19994/user/hive/warehouse/<my table dir>";
 
-To simulate this, create a Hive table that points to the Alluxio (S3) data set. After downloading the hive SQL script, you will notice that it does not point to HDFS or S3 directly, instead it references the Alluxio file system like this:
+To simulate this, create a Hive table that points to the Alluxio (S3) data set. After downloading the hive SQL script, you will notice that it does not point to HDFS or S3 directly, instead it references the Alluxio virtual file system like this:
 
      CREATE EXTERNAL TABLE IF NOT EXISTS store_sales (
       ...
-     STORED AS PARQUET LOCATION 'alluxio:///data/tpcds/store_sales/'
+     LOCATION 'alluxio:///data/tpcds/store_sales/'
 
 This is possible because Hive has been configured to integrate with Alluxio just like Presto and Spark have been.
 
 Run these commands:
 
-     wget https://raw.githubusercontent.com/gregpalmr/alluxio-on-emr/main/hive/create-hive-tables.sql
+     wget https://raw.githubusercontent.com/gregpalmr/alluxio-on-emr/main/hive/create-hive-tables-alluxio.sql
 
-     hive -f create-hive-tables.sql
+     grep LOCATION create-hive-tables-alluxio.sql
+
+     hive -f create-hive-tables-alluxio.sql
 
 Make sure Hive can access the TPC-DS dataset in Alluxio:
 
@@ -268,7 +264,7 @@ Use the following command to shutdown the Alluxio EMR cluster:
 
 Use the following command to remove the AWS key pair used with the EMR cluster:
 
-     aws --region us-east-1 ec2 delete-key-pair --key-name alluxio-emr-keypair
+     aws --region us-east-1 ec2 delete-key-pair --key-name my-alluxio-emr-keypair
 
 Use the following command to remove the S3 bucket used with the EMR cluster:
 
