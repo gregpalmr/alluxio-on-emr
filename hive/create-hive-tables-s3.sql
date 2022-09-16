@@ -1,5 +1,5 @@
 -- Create a new Hive schema and use it
-CREATE SCHEMA tpcds_s3_db;
+CREATE SCHEMA IF NOT EXISTS tpcds_s3_db;
 USE tpcds_s3_db;
 
 -- Create the store_sales Hive table
