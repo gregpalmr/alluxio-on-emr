@@ -31,6 +31,8 @@ To use the commands outlined in the repo, you will need the following:
 
      git clone https://github.com/gregpalmr/alluxio-on-emr
 
+     cd alluxio-on-emr
+
 ## Step 2. Create a public ssh key and AWS keypair
 
 Generate a private and public ssh key using a command like this:
@@ -56,11 +58,13 @@ Use the following commands to create the S3 bucket:
 
 Use the following command to launch the Alluxio EMR cluster.  Modify the following arguments as needed:
 
+     ...
      --name "my-alluxio-emr-cluster-1"
      --tags  "Name=my-alluxio-emr-cluster-1"
      --ec2-attributes KeyName=my-alluxio-emr-keypair
      --instance-type r4.4xlarge
      --instance-count 5                        (must be at least 2)
+     ...
 
 And modify the S3 bucket name as the first argument to the alluxio-enterprise-emr-bootstrap.sh script. Like this:
 
@@ -256,7 +260,7 @@ Finally, unload the data from the Alluxio cache using the commands:
 
 Use the following command to get the EMR cluster ID:
 
-     emr_cluster_id=$(aws emr list-clusters --active | grep my-alluxio-emr-cluster-1 | cut -f 3)
+     emr_cluster_id=$(aws emr list-clusters --active --output text | grep my-alluxio-enterprise-emr-cluster-1 | cut -f 3)
 
 Use the following command to shutdown the Alluxio EMR cluster:
 
