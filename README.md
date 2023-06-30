@@ -81,7 +81,7 @@ Use the following create-cluster command:
 	        --instance-count 5 \
 	        --instance-type r4.4xlarge \
 	        --release-label emr-6.7.0 \
-	        --applications Name=Presto Name=Hive Name=Spark Name=JupyterHub \
+	        --applications Name=Presto Name=Hive Name=Spark Name=Hadoop \
              --configurations '[ { "Classification": "hive-site", "Properties": { "hive.metastore.client.factory.class": "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory", "fs.s3.impl": "alluxio.hadoop.ShimFileSystem", "fs.AbstractFileSystem.s3.impl": "alluxio.hadoop.AlluxioShimFileSystem", "fs.hdfs.impl": "alluxio.hadoop.ShimFileSystem", "fs.AbstractFileSystem.hdfs.impl": "alluxio.hadoop.AlluxioShimFileSystem" } }, { "Classification": "core-site", "Properties": { "fs.s3.impl": "alluxio.hadoop.ShimFileSystem", "fs.AbstractFileSystem.s3.impl": "alluxio.hadoop.AlluxioShimFileSystem" } }, { "Classification": "presto-connector-hive", "Properties": { "hive.metastore": "glue", "hive.s3-file-system-type": "PRESTO" } }, { "Classification": "hadoop-env", "Configurations": [ { "Classification": "export", "Properties": { "HADOOP_CLASSPATH": "/opt/alluxio/client/alluxio-client.jar:${HADOOP_CLASSPATH}" } } ], "Properties": {} } ]' \
 	        --ebs-root-volume-size 30 \
 	        --log-uri s3://alluxio-emr-bucket/emr-cluster-logs \
