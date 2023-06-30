@@ -1,5 +1,5 @@
 # alluxio-on-emr
-Launch Alluxio Data Orchestration on EMR with Presto, Spark, Hive and JupyterLab
+Launch Alluxio Data Orchestration on EMR with Hadoop, Presto, Spark, and Hive
 
 ## Background
 
