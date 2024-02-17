@@ -75,7 +75,7 @@ NOTE: The alluxio-enterprise-emr-bootstrap.sh script does NOT configure the Allu
 Use the following create-cluster command:
 
 aws emr create-cluster \
-        --region us-east-1
+        --region us-east-1 \
         --name "my-alluxio-enterprise-emr-cluster-1" \
         --tags "Name=my-alluxio-enterprise-emr-cluster-1" \
         --ec2-attributes KeyName=my-alluxio-emr-keypair \
