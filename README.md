@@ -145,9 +145,11 @@ To demonstrate the Transparent URI capability, create a Hive table that uses a L
 
      LOCATION 's3://alluxio-emr-bucket/data/tpcds/store_sales/'
 
-Run these commands:
+Run the command:
 
      wget https://raw.githubusercontent.com/gregpalmr/alluxio-on-emr/main/hive/create-hive-tables-s3.sql
+
+Then run:
 
      hive -f create-hive-tables-s3.sql
 
@@ -171,6 +173,8 @@ Use the Trino CLI to run the TPC-DS query 44 that gets the top 10 stores with th
 
     wget https://raw.githubusercontent.com/gregpalmr/alluxio-on-emr/main/hive/q44.sql
 
+Then, run the command:
+
     time trino-cli --catalog hive --schema tpcds_s3_db -f q44.sql 
 
 Note that it took about 56 seconds to run the TPC-DS 44 query with 4 Trino and Alluxio worker nodes.
@@ -190,6 +194,8 @@ The query should be about 42% faster and taking only 32 seconds to run, after Al
 Finally, unload the data from the Alluxio cache using the commands:
 
      alluxio fs free /data
+
+and:
 
      alluxio fsadmin report
 
