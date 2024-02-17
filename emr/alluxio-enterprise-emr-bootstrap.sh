@@ -316,7 +316,7 @@ expose_alluxio_client_jar() {
   sudo ln -s "${ALLUXIO_HOME}/client/alluxio-client.jar" /usr/lib/spark/jars/alluxio-client.jar
 
   # expose Alluxio client jar to Presto
-  for dir in `ls /usr/lib/presto/plugin/`
+  for dir in `ls /usr/lib/trino/plugin/`
   do 
        echo $dir
        sudo ln -s "${ALLUXIO_HOME}/client/alluxio-client.jar" $dir/alluxio-client.jar
@@ -400,7 +400,7 @@ configure_alluxio_general_properties() {
   set_alluxio_property alluxio.master.journal.type "UFS"
   set_alluxio_property alluxio.master.mount.table.root.ufs "${root_ufs_uri}"
   set_alluxio_property alluxio.master.security.impersonation.hive.users "*"
-  set_alluxio_property alluxio.master.security.impersonation.presto.users "*"
+  set_alluxio_property alluxio.master.security.impersonation.trino.users "*"
   set_alluxio_property alluxio.master.security.impersonation.yarn.users "*"
   set_alluxio_property alluxio.worker.tieredstore.levels "1"
   set_alluxio_property alluxio.security.authorization.permission.enabled "false"
